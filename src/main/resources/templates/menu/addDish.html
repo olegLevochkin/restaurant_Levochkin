@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{admin.title}">Admin</title>
+    <link href="css/main.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#" th:text="#{sitename}">WebSiteName</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/" th:text="#{nav.home}">Home</a></li>
+                <li><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
+                <li><a href="/user" th:text="#{nav.all.users}">All Users</a></li>
+                <li class="active"><a href="/add" th:text="#{nav.add.dish}">Add Dish</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <form method="post" th:action="@{/logout}">
+                        <button class="btn btn-link navbar-btn navbar-link" th:text="#{nav.logout}" type="submit">
+                            Log off
+                        </button>
+                    </form>
+                </li>
+                <li id="language">
+                    <th:block th:include="/localeR"/>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="dishes__form">
+        <form class="dishes_form__add" enctype="multipart/form-data" method="post"
+              th:action="@{/add}" th:object="${dish}">
+
+            <h2 th:text="#{addDish.add}"></h2>
+            <h3 class="error" th:text="#{dish.error}" th:unless="${error==null}"></h3>
+
+            <h3 class="error" th:text="#{dish.size.error}" th:unless="${error1==null}">huge data</h3>
+
+            <div class="form-group">
+                <input class="custom-file-input" id="file" multiple name="file" placeholder="choose file" type="file">
+
+            </div>
+
+            <div class="form-group">
+                <label th:text="#{dish.ukrName}">Ukrainian name</label>
+                <input class="form-control" th:field="*{nameUkr}">
+                <span class="error" th:errors="*{nameUkr}"></span>
+            </div>
+
+            <div class="form-group">
+                <label th:for="name" th:text="#{dish.dishName}">Dish name</label>
+                <input class="form-control" th:field="*{name}">
+                <span class="error" th:errors="*{name}"></span>
+            </div>
+
+            <div class="form-group">
+                <label th:for="price" th:text="#{dish.price}">Price</label>
+                <input class="form-control" th:field="*{price}" type="number">
+                <span class="error" th:errors="*{price}"></span>
+            </div>
+            <div class="form-group">
+                <div class="check-box" th:each="prodT:${products}">
+                    <label th:for="${prodT.product}" th:text="#{prod. + ${prodT.product}}"></label>
+                    <input name="prod" th:id="${prodT.product}" th:value="${prodT.product}" type="checkbox">
+                    <span class="error" th:errors="*{productsForDish}"></span>
+                </div>
+            </div>
+
+            <button class="btn btn-success enter"
+                    th:text="#{dish.add}"
+                    type="submit" value="Sign In">
+                add Dish
+            </button>
+        </form>
+        <form class="dishes_form__delete" method="post" th:action="@{/remove}">
+            <h2 th:text="#{dish.remove}"></h2>
+            <div class="form-group">
+                <div class="check-box" th:each="dish:${dishes}">
+                    <label th:if="#{lang }== '??lang_en??'" th:text="${dish.name}"></label>
+                    <label th:text="${dish.nameUkr}" th:unless="#{lang }== '??lang_en??'"></label>
+                    <input name="dishesToRemove" th:id="${dish.name}" th:value="${dish.id}" type="checkbox">
+                </div>
+            </div>
+
+            <button class="btn btn-danger enter" th:text="#{dish.delete}"
+                    type="submit"
+                    value="Sign In">
+            </button>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

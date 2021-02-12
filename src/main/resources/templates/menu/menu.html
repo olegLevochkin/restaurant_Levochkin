@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{menu.title}">Menu</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">WebSiteName</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/" th:text="#{nav.home}">Home</a></li>
+
+                <li th:if="${authorized}=='true'"><a href="/order" th:text="#{nav.order}">Order</a></li>
+                <li th:if="${authorized}=='true'"><a href="/addMoney" th:text="#{nav.balance}">Balance</a></li>
+                <li th:if="${authorized}=='true'"><a href="/user_confirm" th:text="#{nav.odering}">Odering</a></li>
+                <li th:if="${authorized}=='true'"><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li th:if="${authorized}!='true'"><a href="/login" th:text=" #{nav.login}">login</a></li>
+                <li th:if="${authorized}=='true'">
+                    <form method="post" th:action="@{/logout}">
+                        <button class="btn btn-link navbar-btn navbar-link" th:text="#{nav.logout}" type="submit">
+                            Log off
+                        </button>
+                    </form>
+                </li>
+                <li id="language">
+                    <th:block th:include="/localeR"/>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <text th:if="${moneyBalance}==null"></text>
+    <text th:text="#{menu.balance}+' '+${moneyBalance}" th:unless="${moneyBalance}==null">You have:</text>
+    <text th:text="${message}">error message</text>
+
+    <h1 th:text="#{menu.menu}"></h1>
+
+    <table class="table">
+        <tr>
+            <th scope="col" th:text="#{dish.foto}">foto</th>
+            <th scope="col" th:text="#{dish.dishName}">name of Dish</th>
+            <th scope="col" th:text="#{dish.price}">price of dish</th>
+            <th scope="col" th:text="#{dish.products}">Products</th>
+            <th th:if="${authorized}=='true'" scope="col" th:text="#{dish.getNow}">GetNow</th>
+        </tr>
+        <tr th:each="dish : ${dishes.content}">
+
+            <td><img class="img" alt="Picture" th:src="'/img/'+${dish.fileName}"></td>
+            <td th:if="#{lang }== '??lang_en??'" th:text="${dish.name}"></td>
+            <td th:text="${dish.nameUkr}" th:unless="#{lang }== '??lang_en??'"></td>
+            <td th:text="${dish.price}"></td>
+            <td>
+                <text th:each="product:${dish.productsForDish}" th:text="#{prod. + ${product.product}}+', ' "></text>
+            </td>
+            <td th:if="${authorized}=='true'">
+                <form method="post" th:action="@{/order/addToCard}">
+                    <button class="btn btn-success enter" name="dish"
+                            th:text="#{dish.add}" th:value="${dish.name}" type="submit"
+                            value="Registrate">AddDish
+                    </button>
+                </form>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

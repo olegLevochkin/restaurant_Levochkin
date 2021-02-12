@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{admin.title}">Admin</title>
+    <link href="css/main.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#" th:text="#{sitename}">WebSiteName</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/" th:text="#{nav.home}">Home</a></li>
+                <li class="active"><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
+                <li><a href="/user" th:text="#{nav.all.users}">All Users</a></li>
+                <li><a href="/add" th:text="#{nav.add.dish}">Add Dish</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <form method="post" th:action="@{/logout}">
+                        <button class="btn btn-link navbar-btn navbar-link" th:text="#{nav.logout}" type="submit">
+                            Log off
+                        </button>
+                    </form>
+                </li>
+                <li id="language">
+                    <th:block th:include="/localeR"/>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <table class="table">
+        <tr>
+            <th scope="col" th:text="#{product.name}">Name of Dish</th>
+            <th scope="col" th:text="#{product.amount}">Amount have</th>
+            <th scope="col" th:text="#{product.min.amount}">Min amount</th>
+        </tr>
+        <tr th:each="product:${products}">
+            <td th:text="#{prod. + ${product.product}}"></td>
+            <td th:text="${product.amountHave}"></td>
+            <td th:text="${product.minAmount}"></td>
+        </tr>
+    </table>
+    <div>
+        <form method="post" th:action="@{/replenish_stock_of_products}">
+            <button class="btn btn-success enter" th:text="#{product.addHave}"
+                    type="submit"
+                    value="Registrate">
+                Add Products
+            </button>
+        </form>
+    </div>
+    <h1 th:text="#{admin.unconfirmed.orders}">Non confirmed orders</h1>
+    <div>
+        <form method="get" th:action="@{/checkOrder}">
+
+            <button class="btn btn-success enter" name="orderID"
+                    th:each="orderID:${orderID}"
+                    th:text="#{admin.order.number}+' № '+ ${orderID}" th:value="${orderID}" type="submit"
+                    value="Registrate">
+            </button>
+
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

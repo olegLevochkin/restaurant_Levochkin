@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{order.title}">Order</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">WebSiteName</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/" th:text="#{nav.home}">Home</a></li>
+                <li class="active"><a href="/order" th:text="#{nav.order}">Order</a></li>
+                <li><a href="/addMoney" th:text="#{nav.balance}">Balance</a></li>
+                <li><a href="/user_confirm" th:text="#{nav.odering}">Odering</a></li>
+                <li><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <form method="post" th:action="@{/logout}">
+                        <button class="btn btn-link navbar-btn navbar-link" th:text="#{nav.logout}" type="submit">
+                            Log off
+                        </button>
+                    </form>
+                </li>
+                <li id="language">
+                    <th:block th:include="/localeR"/>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <h3 th:text="#{order.notEnought}" th:unless="${notEnought}==null"></h3>
+    <table class="table">
+        <tr>
+            <th scope="col" th:text="#{dish.dishName}">name of Dish</th>
+            <th scope="col" th:text="#{dish.price}">price of dish</th>
+            <th scope="col" th:text="#{dish.amount}">Count</th>
+            <th scope="col" th:text="#{dish.delete}">delete</th>
+        </tr>
+
+        <tr th:each="entry: ${map}">
+            <td th:if="#{lang }== '??lang_en??'" th:text="${entry.key.name}"></td>
+            <td th:text="${entry.key.nameUkr}" th:unless="#{lang }== '??lang_en??'"></td>
+            <td th:text="${entry.key.price}"></td>
+            <td th:text="${entry.value}"></td>
+            <td>
+                <form method="post" th:action="@{/order/removeD}">
+                    <button class="btn btn-danger" name="name"
+                            th:text="#{dish.delete}" th:value="${entry.key.name}" type="submit" value="Registrate">
+                        Delete
+                    </button>
+                </form>
+            </td>
+        </tr>
+    </table>
+    <h2 th:text="#{order.total} + ': ' + ${amount}">All price</h2>
+    <form method="post" th:action="@{/order/addedOrder}">
+        <button class="btn btn-success enter" name="actA" th:if="${notEnought}==null"
+                th:text="#{admin.confirm}" type="submit" value="Registrate">
+            Confirm
+        </button>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Server properties
+server:
+  port: 8092
+
+upload:
+  path: C:/Users/olegl/IdeaProjects/forImages
+
+
+spring:
+  datasource:
+    password: root
+    url: jdbc:mysql://localhost:3306/restaurant-db
+    username: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+  mandatory-file-encoding: UTF-8
+

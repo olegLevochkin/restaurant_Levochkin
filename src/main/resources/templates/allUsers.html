@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{admin.title}">Admin</title>
+    <link href="css/main.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#" th:text="#{sitename}">WebSiteName</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/" th:text="#{nav.home}">Home</a></li>
+                <li><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
+                <li><a href="/user" th:text="#{nav.all.users}">All Users</a></li>
+                <li class="active"><a href="/add" th:text="#{nav.add.dish}">Add Dish</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <form method="post" th:action="@{/logout}">
+                        <button class="btn btn-link navbar-btn navbar-link" th:text="#{nav.logout}" type="submit">
+                            Log off
+                        </button>
+                    </form>
+                </li>
+                <li id="language">
+                    <th:block th:include="/localeR"/>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Username</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Role</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${usersPage.getContent()}">
+            <td scope="row"><span th:text="${user.id}">id</span></td>
+            <td><span th:text="${user.username}">username</span></td>
+            <td><span th:text="${user.firstName}">firstName</span></td>
+            <td><span th:text="${user.lastName}">lastName</span></td>
+            <td><span th:text="${user.roles}">roles</span></td>
+        </tr>
+        </tbody>
+    </table>
+    <ul class="pagination" id="pagination" th:if="${usersPage.totalPages > 0}">
+        <li th:class="${pageNumber == usersPage.number} ? active"
+            th:each="pageNumber : ${numbers}">
+
+            <a th:href="@{'/user?page=' + ${pageNumber} }"
+               th:text="${pageNumber + 1}"></a>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

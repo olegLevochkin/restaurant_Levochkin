@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{reg.title}">Registration</title>
+    <link href="css/main.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">WebSiteName</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/" th:text="#{nav.home}">Home</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/login" th:text=" #{nav.login}"></a></li>
+                <th:block th:include="/localeR"></th:block>
+            </ul>
+        </div>
+    </nav>
+    <div class="col-md-6 col-md-offset-3">
+        <h1 th:text="#{reg.header}">Registration Form</h1>
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+
+            <h3 class="error" th:text="${message}" th:unless="${message==null}">Error message</h3>
+
+            <form autocomplete="off" id="reg-form" method="post" name="form"
+                  novalidate
+                  th:action="@{/registration}">
+
+                <div class="form-group">
+                    <label for="username" th:text="#{reg.login}">Username</label>
+                    <input class="form-control"
+                           id="username"
+                           name="username"
+                           required
+                           th:placeholder="#{reg.login.placeholder}"
+                           type="text">
+                </div>
+
+                <div class="form-group">
+                    <label for="firstName" th:text="#{reg.first_name}">First Name</label>
+                    <input class="form-control"
+                           id="firstName"
+                           name="firstName"
+                           required
+                           th:placeholder="#{reg.first_name.placeholder}"
+                           type="text">
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName" th:text="#{reg.last_name}">Last Name</label>
+                    <input class="form-control"
+                           id="lastName"
+                           name="lastName"
+                           required
+                           th:placeholder="#{reg.last_name.placeholder}"
+                           type="text">
+                </div>
+
+                <div class="form-group">
+                    <label for="exampleInputPassword1" th:text="#{reg.password}">Password</label>
+                    <input class="form-control"
+                           id="exampleInputPassword1"
+                           name="password"
+                           required
+                           th:placeholder="#{reg.password.placeholder}"
+                           type="password">
+                </div>
+<!--                <input name="_csrf" type="hidden" value="{{_csrf.token}}"/>-->
+                <button class="btn btn-success"
+                        th:text="#{reg.register}" type="submit" value="Registrate">
+                    register
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
