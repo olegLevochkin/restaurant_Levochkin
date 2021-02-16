@@ -43,61 +43,60 @@ public class AdminDishController {
         model.addAttribute("dishes", dishService.getAllDishes());
         model.addAttribute("products", productService.getAllProducts());
 
-        return "menu/addDish.html";
+        return "menu/addDish";
     }
 
     @PostMapping(value = "/add")
-    public String processDish(@ModelAttribute @Valid Dish dish, Errors errors,
-                              @RequestParam(required = false) Optional<ArrayList<String>> prod,
+    public String processDish(@ModelAttribute @Valid Dish dish,
+                              Errors errors,
+                              @RequestParam(required = false) Optional<ArrayList<String>> productsNamesList,
                               @RequestParam("file") Optional<MultipartFile> file,
                               Model model) throws IOException {
         if (errors.hasErrors()) {
             model.addAttribute("dishes", dishService.getAllDishes());
             model.addAttribute("products", productService.getAllProducts());
-            log.info("{}", "Errors occur when adding a dish " + errors.toString() );
+            log.info("Errors occur when adding a dish {}", errors.toString());
 
-            return "menu/addDish.html";
+            return "menu/addDish";
         }
+
         if (file.isPresent()) {
-            File uploadDir = new File(uploadPath);
+            final File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
                 uploadDir.mkdir();
             }
-            String uuidFile = UUID.randomUUID().toString();
-            String resultFilename = uuidFile + "." + file.get().getOriginalFilename();
+            final String uuidFile = UUID.randomUUID().toString();
+            final String resultFilename = uuidFile + "." + file.get().getOriginalFilename();
             file.get().transferTo(new File(uploadPath + "/" + resultFilename));
-
             dish.setFileName(resultFilename);
-            log.info("{}", "Image saved successfully " + resultFilename.toString() );
+            log.info("Image saved successfully {}", resultFilename);
         }
-        if (prod.isPresent()) {
-            List<Product> prodTemp = new ArrayList<>();
-            prod.get().forEach(product -> prodTemp.add(productService.getByProductName(product)));
 
-            dish.setProductsForDish(prodTemp);
-            log.info("{}", "Products saved successfully " + prod.toString() );
+        if (productsNamesList.isPresent()) {
+            final List<Product> productsList = new ArrayList<>();
+            productsNamesList.get().forEach(product -> productsList.add(productService.getByProductName(product)));
+            dish.setProductsForDish(productsList);
+            log.info("Products saved successfully {}", productsNamesList.toString());
         }
+
         try {
             dishService.saveDish(dish);
-            log.info("{}", "New dish saved successfully " + dish.getName());
+            log.info("New dish saved successfully {}", dish.getName());
         } catch (DataIntegrityViolationException e) {
-            model.addAttribute("error", "existing dish");
+            model.addAttribute("error", "Existing dish");
             model.addAttribute(new Dish());
             model.addAttribute("dishes", dishService.getAllDishes());
             model.addAttribute("products", productService.getAllProducts());
 
-            return "menu/addDish.html";
-
+            return "menu/addDish";
         }
 
         return "redirect:/add";
     }
 
     @PostMapping("/remove")
-    public String removeDish(
-            @RequestParam ArrayList<Long> dishesToRemove) {
+    public String removeDish(@RequestParam ArrayList<Long> dishesToRemove) {
         dishesToRemove.forEach(dishService::deleteByID);
-        log.info("{}", "Dishes removed successfully");
 
         return "redirect:/add";
     }

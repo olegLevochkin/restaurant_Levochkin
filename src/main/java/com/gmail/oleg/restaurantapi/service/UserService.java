@@ -41,7 +41,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void addMoney(BigInteger moneyToAdd, String username) {
-        User user = findByUsername(username);
+        final User user = findByUsername(username);
         user.setMoneyHave(user.getMoneyHave().add(moneyToAdd));
         saveNewUser(user);
     }
@@ -49,7 +49,7 @@ public class UserService implements UserDetailsService {
     @Transactional(propagation = Propagation.REQUIRES_NEW,
             rollbackFor = BankTransactionException.class)
     public void payTheOrder(BigInteger sum) throws BankTransactionException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (findByUsername(authentication.getName()).getMoneyHave().compareTo(sum) < 0) {
             throw new BankTransactionException(
                     "The money in the account is not enough ("

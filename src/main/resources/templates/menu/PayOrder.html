@@ -22,7 +22,6 @@
                 <li><a href="/order" th:text="#{nav.order}">Order</a></li>
                 <li><a href="/addMoney" th:text="#{nav.balance}">Balance</a></li>
                 <li class="active"><a href="/user_confirm" th:text="#{nav.odering}">Odering</a></li>
-                <li><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -38,13 +37,13 @@
             </ul>
         </div>
     </nav>
-    <h3 th:text="#{balance.notEnoughtMoney}+' '+${notEnought}" th:unless="${notEnought}==null"></h3>
+    <h3 th:text="#{balance.notEnoughMoney}+' '+${notEnough}" th:unless="${notEnough}==null"></h3>
 
     <h1 th:text="#{order.nonConf}">Non confirmed orders</h1>
 
     <div>
         <form method="get" th:action="@{/checkOrderUser}">
-            <button class="btn btn-danger enter" name="ind"
+            <button class="btn btn-danger enter" name="index"
                     th:each="indx:${ind}"
                     th:text="#{admin.order.number}+' '+ ${indx}" th:value="${indx}" type="submit"
                     value="Registrate">

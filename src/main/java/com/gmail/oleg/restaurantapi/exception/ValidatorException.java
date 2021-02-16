@@ -6,8 +6,5 @@ public class ValidatorException extends IllegalArgumentException {
         super(errorMessage);
     }
 
-    public ValidatorException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }
 

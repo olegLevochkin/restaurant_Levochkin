@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -31,52 +30,56 @@ public class AdminOrderController {
     @GetMapping("/adminOrder")
     public String adminOrder(Model model) {
         model.addAttribute("orderID", orderService.confirmToAdmin());
-        log.info("{}", "Data on unconfirmed orders was transmitted ");
-
         model.addAttribute("products", productService.getAllProducts());
-        log.info("{}", "product data transferred ");
 
-        if (productService.getAllProducts().stream().anyMatch(s -> s.getAmountHave() < s.getMinAmount())) {
+        if (productService.getAllProducts().stream()
+                .anyMatch(product -> product.getAmountHave() < product.getMinAmount())) {
             return replenish();
         }
+        log.info("Information for admin about orders");
 
-        return "menu/adminOrder.html";
+        return "menu/adminOrder";
     }
 
     @PostMapping("/replenish_stock_of_products")
     public String replenish() {
-        List<Product> products = productService.getAllProducts();
+        final List<Product> products = productService.getAllProducts();
         products.forEach(product -> {
-            product.setAmountHave(product.getAmountHave()
-                    + product.getProductInBox() * ((product.getMaxAmount() - product.getAmountHave()) / product.getProductInBox()));
-
+            product.setAmountHave(product.getAmountHave() + ((product.getMaxAmount() - product.getAmountHave())));
             productService.saveProduct(product);
-            log.info("{}", "Product replenishment was successful ");
+            log.info("The amount of product {} is filled to the maximum", product.getProduct());
         });
 
         return "redirect:/adminOrder";
     }
 
     @GetMapping("/checkOrder")
-    public String checkorder(@RequestParam Long orderID, Model model) {
+    public String checkOrder(@RequestParam Long orderID,
+                             Model model) {
         model.addAttribute("orderID", orderID);
-        log.info("{}", "Order number: " + orderID);
 
-        Map<Dish, Long> orderClient = new HashMap<>();
+        final Map<Dish, Long> orderClient = new HashMap<>();
         dishService.findByOrderID(orderID)
-                .stream().distinct().forEach(s -> orderClient.put(s, dishService
-                .findByOrderID(orderID).stream()
-                .filter(x -> x.equals(s)).count()));
+                .stream()
+                .distinct()
+                .forEach(dish -> orderClient.put(dish, dishService.findByOrderID(orderID).stream()
+                        .filter(dishToCount -> dishToCount.equals(dish))
+                        .count()));
         model.addAttribute("orderClient", orderClient);
 
-        Map<String, Long> neededProducts = new HashMap<>();
-        productService.getAllProductsFromOrder(orderID).stream().map(s -> neededProducts.containsKey(s)
-                ? neededProducts.put(s, neededProducts.get(s) + 1L)
-                : neededProducts.put(s, 1L)).collect(Collectors.toList());
+        final Map<String, Integer> needProductsToOrder = new HashMap<>();
 
-        model.addAttribute("products", neededProducts);
+        productService.getAllProductsFromOrder(orderID).forEach(product -> {
+            if (needProductsToOrder.containsKey(product)) {
+                needProductsToOrder.put(product, needProductsToOrder.get(product) + 1);
+            } else {
+                needProductsToOrder.put(product, 1);
+            }
+        });
 
-        return "menu/checkPage.html";
+        model.addAttribute("products", needProductsToOrder);
+
+        return "menu/checkPage";
     }
 
     @PostMapping("/checkOrder/Confirm")

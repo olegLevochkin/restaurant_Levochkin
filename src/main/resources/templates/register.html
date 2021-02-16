@@ -35,7 +35,6 @@
             <h3 class="error" th:text="${message}" th:unless="${message==null}">Error message</h3>
 
             <form autocomplete="off" id="reg-form" method="post" name="form"
-                  novalidate
                   th:action="@{/registration}">
 
                 <div class="form-group">
@@ -77,7 +76,6 @@
                            th:placeholder="#{reg.password.placeholder}"
                            type="password">
                 </div>
-<!--                <input name="_csrf" type="hidden" value="{{_csrf.token}}"/>-->
                 <button class="btn btn-success"
                         th:text="#{reg.register}" type="submit" value="Registrate">
                     register

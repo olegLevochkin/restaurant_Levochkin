@@ -23,7 +23,6 @@
                 <li class="active"><a href="/order" th:text="#{nav.order}">Order</a></li>
                 <li><a href="/addMoney" th:text="#{nav.balance}">Balance</a></li>
                 <li><a href="/user_confirm" th:text="#{nav.odering}">Odering</a></li>
-                <li><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -39,7 +38,7 @@
             </ul>
         </div>
     </nav>
-    <h3 th:text="#{order.notEnought}" th:unless="${notEnought}==null"></h3>
+    <h3 th:text="#{order.notEnough}" th:unless="${notEnough}==null"></h3>
     <table class="table">
         <tr>
             <th scope="col" th:text="#{dish.dishName}">name of Dish</th>
@@ -65,7 +64,7 @@
     </table>
     <h2 th:text="#{order.total} + ': ' + ${amount}">All price</h2>
     <form method="post" th:action="@{/order/addedOrder}">
-        <button class="btn btn-success enter" name="actA" th:if="${notEnought}==null"
+        <button class="btn btn-success enter" name="actA" th:if="${notEnough}==null"
                 th:text="#{admin.confirm}" type="submit" value="Registrate">
             Confirm
         </button>

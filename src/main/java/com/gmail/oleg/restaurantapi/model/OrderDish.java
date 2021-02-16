@@ -26,7 +26,7 @@ import java.util.List;
 public class OrderDish {
     @NotNull
     @ManyToMany
-    List<Dish> dishes;
+    private List<Dish> dishes;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

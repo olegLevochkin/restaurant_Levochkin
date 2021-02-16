@@ -24,11 +24,11 @@
                 <li th:if="${authorized}=='true'"><a href="/order" th:text="#{nav.order}">Order</a></li>
                 <li th:if="${authorized}=='true'"><a href="/addMoney" th:text="#{nav.balance}">Balance</a></li>
                 <li th:if="${authorized}=='true'"><a href="/user_confirm" th:text="#{nav.odering}">Odering</a></li>
-                <li th:if="${authorized}=='true'"><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
+                <li th:if="${isAdmin}== true"><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li th:if="${authorized}!='true'"><a href="/login" th:text=" #{nav.login}">login</a></li>
-                <li th:if="${authorized}=='true'">
+                <li th:if="${authorized} != 'true'"><a href="/login" th:text=" #{nav.login}">login</a></li>
+                <li th:if="${authorized} == 'true'">
                     <form method="post" th:action="@{/logout}">
                         <button class="btn btn-link navbar-btn navbar-link" th:text="#{nav.logout}" type="submit">
                             Log off
@@ -74,6 +74,14 @@
             </td>
         </tr>
     </table>
+    <ul class="pagination" id="pagination" th:if="${dishes.totalPages > 0}">
+        <li th:class="${pageNumber == dishes.number} ? active"
+            th:each="pageNumber : ${numbers}">
+
+            <a th:href="@{'/?page=' + ${pageNumber} }"
+               th:text="${pageNumber + 1}"></a>
+        </li>
+    </ul>
 </div>
 </body>
 </html>

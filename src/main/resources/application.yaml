@@ -3,8 +3,7 @@ server:
   port: 8092
 
 upload:
-  path: C:/Users/olegl/IdeaProjects/forImages
-
+  path: C:/Users/olegl/IdeaProjects/restaurant_Levochkin/src/main/resources/static/img
 
 spring:
   datasource:

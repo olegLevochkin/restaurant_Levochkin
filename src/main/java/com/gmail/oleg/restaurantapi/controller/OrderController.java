@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -39,10 +38,10 @@ public class OrderController {
     @GetMapping
     public String orderPage(Model model) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Optional<Long> notCompletedOrderId = orderService.getUnCompletedForUser(username);
-        OrderDish orderDish;
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final String username = authentication.getName();
+        final Optional<Long> notCompletedOrderId = orderService.getUnCompletedForUser(username);
+        final OrderDish orderDish;
 
         if (notCompletedOrderId.isPresent()) {
             orderDish = orderService.getByID(notCompletedOrderId.get()).get();
@@ -50,49 +49,56 @@ public class OrderController {
             return "redirect:/";
         }
 
-        Map<Dish, Long> orderClient = new HashMap<>();
-        dishService.findByOrderID(orderDish.getId())
-                .stream().distinct().forEach(dish -> orderClient.put(dish, dishService
+        final Map<Dish, Long> orderClient = new HashMap<>();
+        dishService.findByOrderID(orderDish.getId()).stream()
+                .distinct().forEach(dish -> orderClient.put(dish, dishService
                 .findByOrderID(orderDish.getId()).stream()
                 .filter(dishName -> dishName.equals(dish)).count()));
 
         model.addAttribute("map", orderClient);
-        log.info("{}", "Add client order to page");
+        log.info("Add client order to page");
 
         model.addAttribute("amount", dishService.findByOrderID(orderDish.getId()).stream()
-                .map(Dish::getPrice).mapToInt(BigInteger::intValue).sum());
-        log.info("{}", "Add total information about order");
+                .map(Dish::getPrice)
+                .mapToInt(BigInteger::intValue)
+                .sum());
+        log.info("Add total information about order");
 
-        List<String> products = productService.getAllProductsFromOrder(orderDish.getId());
-        Map<String, Integer> enoughtProducts = getProductNeededForOrder(products);
+        final List<String> products = productService.getAllProductsFromOrder(orderDish.getId());
+        final Map<String, Integer> enoughProducts = getProductNeededForOrder(products);
 
-        if (products.stream().distinct().map(productService::getByProductName)
-                .anyMatch(s -> (s.getAmountHave() - enoughtProducts.get(s.getProduct())) < 0)) {
-            model.addAttribute("notEnought", "we dont have enough products");
-            log.info("{}", "Error : not enought products for dishes");
+        if (products.stream()
+                .distinct()
+                .map(productService::getByProductName)
+                .anyMatch(product -> (product.getAmountHave() - enoughProducts.get(product.getProduct())) < 0)) {
+            model.addAttribute("notEnough", "we dont have enough products");
+            log.info("Error : not enough products for dishes");
         }
 
-        return "menu/order.html";
+        return "menu/order";
     }
 
     private Map<String, Integer> getProductNeededForOrder(List<String> products) {
-        Map<String, Integer> enoughtProducts = new HashMap<>();
-        products
-                .stream()
+        final Map<String, Integer> enoughProducts = new HashMap<>();
+        products.stream()
                 .map(productService::getByProductName)
-                .map(s -> enoughtProducts.containsKey(s.getProduct())
-                        ? enoughtProducts.put(s.getProduct(), enoughtProducts.get(s.getProduct()) + 1)
-                        : enoughtProducts.put(s.getProduct(), 1)).collect(Collectors.toList());
+                .forEach(s -> {
+                    if (enoughProducts.containsKey(s.getProduct())) {
+                        enoughProducts.put(s.getProduct(), enoughProducts.get(s.getProduct()) + 1);
+                    } else {
+                        enoughProducts.put(s.getProduct(), 1);
+                    }
+                });
 
-        return enoughtProducts;
+        return enoughProducts;
     }
 
     @PostMapping("/removeD")
     public String deleteDishFromOrder(@RequestParam String name) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Optional<Long> notCompletedOrderId = orderService.getUnCompletedForUser(username);
-        OrderDish orderDish;
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final String username = authentication.getName();
+        final Optional<Long> notCompletedOrderId = orderService.getUnCompletedForUser(username);
+        final OrderDish orderDish;
 
         if (notCompletedOrderId.isPresent()) {
             orderDish = orderService.getByID(notCompletedOrderId.get()).get();
@@ -101,27 +107,26 @@ public class OrderController {
         }
 
         IntStream.range(0, orderDish.getDishes().size())
-                .filter(s -> orderDish.getDishes().get(s).getName().equals(name)).limit(1)
-                .forEach(s -> {
+                .filter(dish -> orderDish.getDishes().get(dish).getName().equals(name)).limit(1)
+                .forEach(dishItem -> {
                     orderDish.setPriceAll(orderDish.getPriceAll().subtract(orderDish.getDishes()
-                            .get(s).getPrice()));
-                    orderDish.getDishes().remove(s);
+                            .get(dishItem).getPrice()));
+                    orderDish.getDishes().remove(dishItem);
                 });
-        log.info("{}", "Delete from order dish:  " + name);
+        log.info("Delete from order dish:  {}", name);
 
         orderService.saveOrder(orderDish);
-        log.info("{}", "Updated the order after deleting the dish");
-
+        log.info("Updated the order after deleting the dish");
 
         return "redirect:/order";
     }
 
     @PostMapping("/addToCard")
     public String addOrder(@RequestParam String dish) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Optional<Long> notCompletedOrderId = orderService.getUnCompletedForUser(username);
-        OrderDish orderDish;
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final String username = authentication.getName();
+        final Optional<Long> notCompletedOrderId = orderService.getUnCompletedForUser(username);
+        final OrderDish orderDish;
 
         if (notCompletedOrderId.isPresent()) {
             orderDish = orderService.getByID(notCompletedOrderId.get()).get();
@@ -137,20 +142,22 @@ public class OrderController {
         }
 
         orderDish.setPriceAll(BigInteger.valueOf(orderDish.getDishes().stream()
-                .map(Dish::getPrice).mapToInt(BigInteger::intValue).sum()));
+                .map(Dish::getPrice)
+                .mapToInt(BigInteger::intValue)
+                .sum()));
 
         orderService.saveOrder(orderDish);
-        log.info("{}", "Updated the order after adding the dish");
+        log.info("Updated the order after adding the dish");
 
         return "redirect:/";
     }
 
     @PostMapping("/addedOrder")
     public String addToAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Optional<Long> notCompletedOrderId = orderService.getUnCompletedForUser(username);
-        OrderDish orderDish;
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final String username = authentication.getName();
+        final Optional<Long> notCompletedOrderId = orderService.getUnCompletedForUser(username);
+        final OrderDish orderDish;
 
         if (notCompletedOrderId.isPresent()) {
             orderDish = orderService.getByID(notCompletedOrderId.get()).get();
@@ -158,18 +165,24 @@ public class OrderController {
             return "redirect:/";
         }
 
-        List<String> products = productService.getAllProductsFromOrder(notCompletedOrderId.get());
-        Map<String, Integer> enoughtProducts = getProductNeededForOrder(products);
-        if (products.stream().distinct().map(productService::getByProductName)
-                .anyMatch(s -> s.getAmountHave() - enoughtProducts.get(s.getProduct()) < 0)) {
+        final List<String> products = productService.getAllProductsFromOrder(notCompletedOrderId.get());
+        final Map<String, Integer> enoughProducts = getProductNeededForOrder(products);
+
+        final boolean isEnoughProducts = products .stream()
+                .distinct()
+                .map(productService::getByProductName)
+                .anyMatch(s -> s.getAmountHave() - enoughProducts.get(s.getProduct()) < 0);
+
+        if (isEnoughProducts) {
             return "redirect:/order";
         }
         orderDish.setToAdmin(true);
         orderDish.setCompleted(true);
         orderService.saveOrder(orderDish);
-        log.info("{}", "Updated order after users check");
+        log.info("Updated order after users check");
 
         return "redirect:/";
     }
+
 }
 

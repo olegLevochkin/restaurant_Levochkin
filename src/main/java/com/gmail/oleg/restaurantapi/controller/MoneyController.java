@@ -25,7 +25,6 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 @Slf4j
@@ -38,38 +37,40 @@ public class MoneyController {
 
     @GetMapping("/addMoney")
     public String addMoney(Model model) {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         model.addAttribute(new BalanceDto());
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         model.addAttribute("moneyBalance", userService.findByUsername(authentication.getName())
                 .getMoneyHave());
-        log.info("{}", "Add information about balance");
 
-        return "menu/addBalance.html";
+        return "menu/addBalance";
     }
 
     @PostMapping(value = "/addBalance")
-    public String addMoneyBase(@ModelAttribute @Valid BalanceDto balanceDto, Errors errors,
+    public String addMoneyBase(@ModelAttribute @Valid BalanceDto balanceDto,
+                               Errors errors,
                                Model model) {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (errors.hasErrors()) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             model.addAttribute("moneyBalance", userService.findByUsername(authentication.getName())
                     .getMoneyHave());
-            log.info("{}", "Error when adding balance ");
+            log.info("Error when adding balance");
 
-            return "menu/addBalance.html";
+            return "menu/addBalance";
         }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.findByUsername(authentication.getName());
+
+        final User user = userService.findByUsername(authentication.getName());
         user.setMoneyHave(user.getMoneyHave().add(balanceDto.getMoneyToAdd()));
         userService.saveNewUser(user);
-        log.info("{}", "Balance has been successfully replenished: " + user.getMoneyHave());
+        log.info("Balance has been successfully replenished: {}", user.getMoneyHave());
 
         return "redirect:/addMoney";
     }
 
     @GetMapping("/user_confirm")
     public String userConfirm(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         model.addAttribute("ind",
                 orderService.confirmToUser(userService.getUserIdByUsername(authentication.getName())));
 
@@ -77,77 +78,91 @@ public class MoneyController {
     }
 
     private Map<String, Integer> prodNeeded(List<String> products) {
-        Map<String, Integer> enoughtProducts = new HashMap<>();
-        products
-                .stream()
+        final Map<String, Integer> needProductsToOrder = new HashMap<>();
+        products.stream()
                 .map(productService::getByProductName)
-                .map(product -> enoughtProducts.containsKey(product.getProduct())
-                        ? enoughtProducts.put(product.getProduct(), enoughtProducts.get(product.getProduct()) + 1)
-                        : enoughtProducts.put(product.getProduct(), 1)).collect(Collectors.toSet());
+                .forEach(product -> {
+                    if (needProductsToOrder.containsKey(product.getProduct())) {
+                        needProductsToOrder.put(product.getProduct(), needProductsToOrder.get(product.getProduct()) + 1);
+                    } else {
+                        needProductsToOrder.put(product.getProduct(), 1);
+                    }
+                });
 
-        return enoughtProducts;
+        return needProductsToOrder;
     }
 
     @GetMapping("/checkOrderUser")
-    public String checkOrderUSer(@RequestParam Long ind, Model model) {
-        model.addAttribute("index", ind);
-        Map<Dish, Long> orderClient = new HashMap<>();
+    public String checkOrderUSer(@RequestParam Long index, Model model) {
+        model.addAttribute("index", index);
+        final Map<Dish, Long> orderClient = new HashMap<>();
 
-        dishService.findByOrderIDToUSer(ind)
-                .stream().distinct().forEach(s -> orderClient.put(s, dishService
-                .findByOrderIDToUSer(ind).stream()
-                .filter(x -> x.equals(s)).count()));
+        dishService.findByOrderIDToUSer(index).stream()
+                .distinct()
+                .forEach(dish -> orderClient.put(dish, dishService
+                        .findByOrderIDToUSer(index).stream()
+                        .filter(dishToCount -> dishToCount.equals(dish)).count()));
 
-        List<String> products = productService.getAllProductsFromOrder(ind);
-        Map<String, Integer> enoughtProducts = prodNeeded(products);
+        final List<String> products = productService.getAllProductsFromOrder(index);
 
-        if (products.stream().distinct().map(productService::getByProductName)
-                .anyMatch(s -> s.getAmountHave() - enoughtProducts.get(s.getProduct()) < 0)) {
-            model.addAttribute("notEnought", ind);
+        final Map<String, Integer> enoughProducts = prodNeeded(products);
+
+        final boolean isEnoughProducts = products.stream()
+                .distinct()
+                .map(productService::getByProductName)
+                .anyMatch(product -> product.getAmountHave() - enoughProducts.get(product.getProduct()) < 0);
+
+        if (isEnoughProducts) {
+            model.addAttribute("isEnough", index);
         }
 
         model.addAttribute("orderClient", orderClient);
-        model.addAttribute("price", orderService.getByID(ind).get().getPriceAll());
+        model.addAttribute("price", orderService.getByID(index).get().getPriceAll());
 
-        return "menu/checkPageUser.html";
+        return "menu/checkPageUser";
     }
 
     @GetMapping("/checkOrderUser/Confirm")
-    public String notEnoughtMoney() {
+    public String notEnoughMoney() {
         return "redirect:/user_confirm";
     }
 
     @PostMapping("/checkOrderUser/Confirm")
-    public String confirm(@RequestParam Long ind,
-                          @RequestParam BigInteger price, Model model) {
-        if (orderService.getByID(ind).get().isPayed()) {
+    public String confirm(@RequestParam Long index,
+                          @RequestParam BigInteger price,
+                          Model model) {
+        if (orderService.getByID(index).get().isPayed()) {
             return "redirect:/user_confirm";
         }
 
-        List<String> products = productService.getAllProductsFromOrder(ind);
-        Map<String, Integer> enoughtProducts = prodNeeded(products);
-        String prodLike = enoughtProducts.keySet().stream().filter(s -> enoughtProducts.get(s)
-                .equals(enoughtProducts
-                        .keySet()
-                        .stream()
-                        .map(enoughtProducts::get)
-                        .max(Integer::compareTo)
-                        .get()
-                )).toString();
+        final List<String> products = productService.getAllProductsFromOrder(index);
+        final Map<String, Integer> enoughProducts = prodNeeded(products);
+        final String prodLike = enoughProducts.keySet().stream()
+                .filter(productName -> enoughProducts.get(productName)
+                        .equals(enoughProducts
+                                .keySet().stream()
+                                .map(enoughProducts::get)
+                                .max(Integer::compareTo)
+                                .get()
+                        )).toString();
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.findByUsername(authentication.getName());
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final User user = userService.findByUsername(authentication.getName());
         user.setProdLikeNow(productService.getByProductName(prodLike));
 
         userService.saveNewUser(user);
 
-        if (products.stream().distinct().map(productService::getByProductName)
-                .anyMatch(s -> s.getAmountHave() - enoughtProducts.get(s.getProduct()) < 0)) {
+        final boolean isEnoughProducts = products.stream()
+                .distinct()
+                .map(productService::getByProductName)
+                .anyMatch(product -> product.getAmountHave() - enoughProducts.get(product.getProduct()) < 0);
+
+        if (isEnoughProducts) {
             model.addAttribute("ind",
                     orderService.confirmToUser(userService.getUserIdByUsername(authentication.getName())));
-            model.addAttribute("notEnought", ind);
+            model.addAttribute("notEnough", index);
 
-            return "menu/PayOrder.html";
+            return "menu/PayOrder";
         }
         try {
             userService.payTheOrder(price);
@@ -156,17 +171,19 @@ public class MoneyController {
             model.addAttribute(new BalanceDto());
             model.addAttribute("moneyBalance", userService.findByUsername(authentication.getName())
                     .getMoneyHave());
-            model.addAttribute("notEnoughtMoney", "nEnought");
+            model.addAttribute("notEnoughMoney", "not enough");
 
-            return "menu/addBalance.html";
+            return "menu/addBalance";
         }
-        productService.getAllProductsFromOrder(ind).stream().map(productService::getByProductName)
-                .forEach(s -> {
-                    s.setAmountHave(s.getAmountHave() - 1);
-                    productService.saveProduct(s);
+        productService.getAllProductsFromOrder(index).stream()
+                .map(productService::getByProductName)
+                .forEach(product -> {
+                    product.setAmountHave(product.getAmountHave() - 1);
+                    productService.saveProduct(product);
                 });
 
-        orderService.payed(ind);
+        orderService.payed(index);
+
         return "redirect:/";
     }
 }

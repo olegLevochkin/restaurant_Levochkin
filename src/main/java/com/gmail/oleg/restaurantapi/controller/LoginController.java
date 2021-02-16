@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -19,17 +20,18 @@ import javax.servlet.http.HttpServletRequest;
 public class LoginController {
     private final UserService userService;
 
-    @GetMapping("/login/error")
-    public String login(Model model) throws ServletException {
-        model.addAttribute("loginErrorMessage", "error");
-        log.info("{}", "Authentication failed ");
-
-        return "login";
-    }
-
     @GetMapping("/login")
-    public String login() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String login(Model model,
+                        @RequestParam(value = "error", defaultValue = "false") String error) {
+        if (error.equals("true")) {
+            model.addAttribute("loginErrorMessage", "error");
+            log.info("Authentication failed");
+
+            return "login";
+        }
+
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (userService.findByUsername(authentication.getName()) != null) {
             return "redirect:/logout";
         }
@@ -39,7 +41,7 @@ public class LoginController {
 
     @RequestMapping("/logout")
     public String logout(HttpServletRequest request) throws ServletException {
-        log.info("{}", "Session is over");
+        log.info("Session is over");
         request.logout();
 
         return "redirect:/login";

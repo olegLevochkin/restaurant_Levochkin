@@ -33,7 +33,7 @@ public class Dish implements Comparable<Dish> {
 
     @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToMany(mappedBy = "dishes", fetch = FetchType.LAZY)
-    List<OrderDish> ordersWithDish;
+   private List<OrderDish> ordersWithDish;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

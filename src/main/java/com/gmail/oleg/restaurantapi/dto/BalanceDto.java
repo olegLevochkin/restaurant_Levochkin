@@ -14,10 +14,4 @@ public class BalanceDto {
     @Digits(integer = 5, fraction = 0, message = "please not more then 5 symbols")
     private BigInteger moneyToAdd;
 
-    public void setMoneyToAdd(BigInteger moneyToAdd) {
-        if (moneyToAdd.compareTo(BigInteger.ZERO) < 0) {
-            throw new IllegalArgumentException("please only positive numbers");
-        }
-        this.moneyToAdd = moneyToAdd;
-    }
 }

@@ -49,6 +49,7 @@
             <td th:text="${dish.key.nameUkr}" th:unless="#{lang }== '??lang_en??'"></td>
             <td th:text="${dish.key.price}"></td>
             <td th:text="${dish.value}"></td>
+        </tr>
     </table>
     <table class="table">
         <tr>
@@ -58,6 +59,7 @@
         <tr th:each="product: ${products}">
             <td th:text="#{prod. + ${product.key}}"></td>
             <td th:text="${product.value}"></td>
+        </tr>
     </table>
 
     <form method="post" th:action="@{/checkOrder/Confirm}">

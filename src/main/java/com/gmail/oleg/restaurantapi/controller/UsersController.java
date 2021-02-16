@@ -23,15 +23,15 @@ import java.util.stream.IntStream;
 public class UsersController {
 
     private final UserRepository userRepository;
+    public static final int DEFAULT_PAGE_SIZE = 3;
 
     @GetMapping
     public String userList(Model model,
                            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page) {
-        Page<User> pageUsers = userRepository.findAll(PageRequest.of(page, 3));
+        final Page<User> pageUsers = userRepository.findAll(PageRequest.of(page, DEFAULT_PAGE_SIZE));
 
         model.addAttribute("usersPage", pageUsers);
         model.addAttribute("numbers", IntStream.range(0, pageUsers.getTotalPages()).toArray());
-        log.info("{}", "Add information about users");
 
         return "allUsers";
     }

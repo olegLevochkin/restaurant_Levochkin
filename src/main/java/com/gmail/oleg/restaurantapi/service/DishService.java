@@ -23,11 +23,11 @@ public class DishService {
     }
 
     public Page<Dish> getAllDishes(Pageable pageable) {
-        int pageSize = pageable.getPageSize();
-        int currentPage = pageable.getPageNumber();
-        int startItem = currentPage * pageSize;
-        List<Dish> list;
-        List<Dish> dishes = dishRepository.findAll();
+        final int pageSize = pageable.getPageSize();
+        final int currentPage = pageable.getPageNumber();
+        final int startItem = currentPage * pageSize;
+        final List<Dish> list;
+        final List<Dish> dishes = dishRepository.findAll();
 
         if (dishes.size() < startItem) {
             list = Collections.emptyList();
@@ -36,10 +36,7 @@ public class DishService {
             list = dishes.subList(startItem, toIndex);
         }
 
-        Page<Dish> dishPage
-                = new PageImpl<>(list, PageRequest.of(currentPage, pageSize), dishes.size());
-
-        return dishPage;
+        return new PageImpl<>(list, PageRequest.of(currentPage, pageSize), dishes.size());
     }
 
     public void saveDish(Dish dish) {

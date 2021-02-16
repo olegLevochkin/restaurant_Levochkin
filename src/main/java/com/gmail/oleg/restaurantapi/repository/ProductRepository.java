@@ -14,9 +14,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Product findByProduct(String product);
 
     @Modifying
-    @Query(value = "select p.product\n"
-            + "    from dish d,order_dish o,dish_products_for_dish dp,product p,order_dish_dishes od\n"
-            + "    where o.id=:id&&dp.dishes_id=d.id&&p.id=dp.products_for_dish_id\n"
+    @Query(value = "select p.product "
+            + "    from dish d,order_dish o,dish_products_for_dish dp,product p,order_dish_dishes od "
+            + "    where o.id=:id&&dp.dishes_id=d.id&&p.id=dp.products_for_dish_id "
             + "    &&od.dishes_id=d.id&&od.orders_with_dish_id=:id",
             nativeQuery = true)
     List<String> getProductsFromOrder(@Param("id") Long longn);

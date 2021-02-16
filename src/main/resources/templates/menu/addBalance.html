@@ -24,7 +24,6 @@
                 <li><a href="/order" th:text="#{nav.order}">Order</a></li>
                 <li class="active"><a href="/addMoney" th:text="#{nav.balance}">Balance</a></li>
                 <li><a href="/user_confirm" th:text="#{nav.odering}">Odering</a></li>
-                <li><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -43,7 +42,7 @@
 
     <form method="post" th:action="@{/addBalance}" th:object="${balanceDto}" class="balance__form">
 
-        <h3 th:text="#{balance.notEnoughtMoney}" th:unless="${notEnoughtMoney}==null"></h3>
+        <h3 th:text="#{balance.notEnoughMoney}" th:unless="${isEnough}==null"></h3>
         <text th:if="${moneyBalance}==null"></text>
         <h1 th:text="#{menu.balance}+' '+${moneyBalance}" th:unless="${moneyBalance}==null"></h1>
 
@@ -62,6 +61,5 @@
 
 
 </div>
-<script src="/js/locale.js" type="text/javascript"></script>
 </body>
 </html>

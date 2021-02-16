@@ -22,7 +22,6 @@
                 <li><a href="/order" th:text="#{nav.order}">Order</a></li>
                 <li><a href="/addMoney" th:text="#{nav.balance}">Balance</a></li>
                 <li class="active"><a href="/user_confirm" th:text="#{nav.odering}">Odering</a></li>
-                <li><a href="/adminOrder" th:text="#{nav.admin}">Admin</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -51,17 +50,17 @@
             <td th:text="${dish.key.nameUkr}" th:unless="#{lang }== '??lang_en??'"></td>
             <td th:text="${dish.key.price}"></td>
             <td th:text="${dish.value}"></td>
+        </tr>
     </table>
 
     <h1 th:text="#{order.total}+' '+${price}"></h1>
 
     <form method="post" th:action="@{/checkOrderUser/Confirm}">
         <input name="price" th:value="${price}" type="hidden">
-        <button class="btn btn-success enter" name="ind" th:if="${notEnought}==null"
+        <button class="btn btn-success enter" name="index" th:if="${notEnough}==null"
                 th:text="#{admin.confirm}" th:value="${index}" type="submit" value="Registrate">Confirm
         </button>
     </form>
-</div>
 </div>
 </body>
 </html>

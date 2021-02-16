@@ -1,6 +1,7 @@
 package com.gmail.oleg.restaurantapi.controller;
 
 import com.gmail.oleg.restaurantapi.model.Dish;
+import com.gmail.oleg.restaurantapi.model.User;
 import com.gmail.oleg.restaurantapi.service.DishService;
 import com.gmail.oleg.restaurantapi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -15,46 +16,33 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
 @Controller
-@RequestMapping("/")
 @RequiredArgsConstructor
 public class MenuController {
 
+    public static final int DEFAULT_PAGE_SIZE = 3;
     private final DishService dishService;
     private final UserService userService;
 
     @GetMapping
-    public String menuPage(Model model, @RequestParam("page") Optional<Integer> page) {
-        int currentPage = page.orElse(1);
-        int pageSize = 4;
-        Page<Dish> dishPage = dishService.getAllDishes(PageRequest.of(currentPage - 1, pageSize));
+    public String menuPage(Model model,
+                           @RequestParam(value = "page", required = false, defaultValue = "0") Integer page) {
+        final Page<Dish> dishPage = dishService.getAllDishes(PageRequest.of(page, DEFAULT_PAGE_SIZE));
 
         model.addAttribute("dishes", dishPage);
-        log.info("{}", "Add dishes to menu page ");
+        model.addAttribute("numbers", IntStream.range(0, dishPage.getTotalPages()).toArray());
 
-//        int totalPages = dishPage.getTotalPages();
-//        if (totalPages > 0) {
-//            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-//                    .boxed()
-//                    .collect(Collectors.toList());
-//            model.addAttribute("pageNumbers", pageNumbers);
-//        }
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (userService.findByUsername(authentication.getName()) != null) {
-            model.addAttribute("moneyBalance", userService.findByUsername(authentication.getName())
-                    .getMoneyHave());
+            final User user = userService.findByUsername(authentication.getName());
+            model.addAttribute("moneyBalance", user.getMoneyHave());
             model.addAttribute("authorized", "true");
-            log.info("{}", "Add user balance to menu page ");
+            model.addAttribute("isAdmin", user.getFirstName().equals("admin"));
         }
 
-        return "menu/menu.html";
+        return "menu/menu";
     }
-
 }
